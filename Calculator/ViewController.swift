@@ -10,16 +10,57 @@ import UIKit
 
 class ViewController: UIViewController {
 
-    override func viewDidLoad() {
-        super.viewDidLoad()
-        // Do any additional setup after loading the view, typically from a nib.
+    @IBOutlet private weak var display: UILabel!
+    @IBOutlet private weak var descriptionBar: UILabel!
+    @IBOutlet private weak var floatingPointBtn: UIButton!
+    
+    private var userIsInTheMiddleOfTyping = false
+    
+    @IBAction private func touchDigit(sender: UIButton) {
+        let digit = sender.currentTitle!
+        print(digit)
+        if userIsInTheMiddleOfTyping {
+            let textCurrentlyInDisplay = display.text!
+            let result = textCurrentlyInDisplay.rangeOfString(".")
+            if result == nil {
+                floatingPointBtn.enabled = true
+            } else{
+                floatingPointBtn.enabled = false
+            }
+            display.text = textCurrentlyInDisplay + digit
+            descriptionBar.text = brain.description
+            //print(display.text)
+        } else{
+            display.text = digit
+            descriptionBar.text = brain.description
+            floatingPointBtn.enabled = true
+        }
+        userIsInTheMiddleOfTyping = true
     }
-
-    override func didReceiveMemoryWarning() {
-        super.didReceiveMemoryWarning()
-        // Dispose of any resources that can be recreated.
+    
+    private var displayValue: Double {
+        get{
+            return Double(display.text!)!
+        }
+        set{
+            display.text = String(newValue)
+        }
     }
-
+    
+    private var brain = CalculatorBrain()
+    
+    
+    @IBAction private func performOperation(sender: UIButton) {
+        if userIsInTheMiddleOfTyping {
+            brain.setOperand(displayValue)
+            userIsInTheMiddleOfTyping = false
+        }
+        if let mathematicalSymbol = sender.currentTitle{
+            brain.performOperation(mathematicalSymbol)
+            descriptionBar.text = brain.description
+        }
+        displayValue = brain.result
+    }
 
 }
 
